@@ -7,8 +7,8 @@ MB=1048576
 GB=1073741824
 HUNDRED=100
 SERVER=$(su - zimbra -c "zmhostname")
-echo "From: admin@bharatvoip.com" > /$FPATH/quotaUsage.txt
-echo "To: administrator@vitelglobal.com" > /$FPATH/quotaUsage.txt
+echo "From: admin@example.com" > /$FPATH/quotaUsage.txt
+echo "To: administrator@example.com" > /$FPATH/quotaUsage.txt
 echo "Subject: E-mail Quota Usage report of Example Domain" >> /$FPATH/quotaUsage.txt
 echo "Mime-Version: 1.0" >> /$FPATH/quotaUsage.txt
 echo "Content-Type: text/html" >> /$FPATH/quotaUsage.txt
