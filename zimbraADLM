@@ -1,0 +1,11 @@
+#!/bin/bash
+# here we are adding multiple user accounts to a distribution list using for loop.
+# IDlist is an array, where we place all the email id's.
+IDlist="
+aarti@example.com
+abdul.rahman@example.com
+"
+for emailid in ${IDlist}; do
+zmprov adlm all@example.com $emailid
+done
+#Note: make it zimbra as a owner of the script and run with zimbra user. 
