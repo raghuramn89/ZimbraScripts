@@ -1,0 +1,40 @@
+#!/bin/bash
+# This script will send an email message of all the users quota usage. and > 80% usage id will be mark with color red.
+DATE=`date +"%Y-%m-%d"`
+FPATH=/opt/zimbra-scripts
+touch /$FPATH/quota.txt quotaUsage.txt
+MB=1048576
+GB=1073741824
+HUNDRED=100
+SERVER=$(su - zimbra -c "zmhostname")
+echo "From: admin@bharatvoip.com" > /$FPATH/quotaUsage.txt
+echo "To: administrator@vitelglobal.com" > /$FPATH/quotaUsage.txt
+echo "Subject: E-mail Quota Usage report of Example Domain" >> /$FPATH/quotaUsage.txt
+echo "Mime-Version: 1.0" >> /$FPATH/quotaUsage.txt
+echo "Content-Type: text/html" >> /$FPATH/quotaUsage.txt
+echo "Hi Team," >> /$FPATH/quotaUsage.txt
+echo -e " <br><br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Find the below details.</br></br>" >> /$FPATH/quotaUsage.txt
+echo -e "<br><br><b>E-mail &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp; AssignedQuota &nbsp; &nbsp; &nbsp; &nbsp;  UsedQuota</b></br></br>" >> /$FPATH/quotaUsage.txt
+su - zimbra -c "zmprov gqu $SERVER" | tr ' ' ',' | while read LINE
+        do
+                USER=$(echo "$LINE" | cut -f1 -d ",")
+                BYTES1=$(echo "$LINE" | cut -f2 -d ",")
+                BYTES2=$(echo "$LINE" | cut -f3 -d ",")
+                ACTUALQUOTA=$(echo $BYTES1 $GB | awk '{print $1 / $2}')
+#               ACTUALQUOTA=$(expr $BYTES1 / 1048576)
+                USAGE=$(echo $BYTES2 $GB | awk '{print $1 / $2}')
+                DEVIDE=$(echo $USAGE $ACTUALQUOTA | awk '{print $1 / $2}')
+                PERCENT=$(echo $DEVIDE $HUNDRED | awk '{print $1 * $2}' | cut -f1 -d ".")
+                if [[ $PERCENT -gt 85 ]]
+                then
+                        echo -e "<br><font color="red"> $USER  &nbsp; &nbsp; &nbsp; &nbsp; $ACTUALQUOTA GB  &nbsp; &nbsp; &nbsp; &nbsp; $USAGE GB </font></br>" >> /$FPATH/quotaUsage.txt
+                        else
+                        echo -e "<br>$USER  &nbsp; &nbsp; &nbsp; &nbsp; $ACTUALQUOTA GB  &nbsp; &nbsp; &nbsp; &nbsp; $USAGE GB</br>" >> /$FPATH/quotaUsage.txt
+                fi
+        done
+# by using grep we are escaping from mail report.
+grep -vwE "spam|ham|galsync|virus" /$FPATH/quotaUsage.txt > /$FPATH/quota.txt
+#
+# sendmail command we can send mail
+#
+su - zimbra -c "sendmail -t < /$FPATH/quota.txt"
