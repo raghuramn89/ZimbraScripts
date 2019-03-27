@@ -1,0 +1,21 @@
+#!/bin/bash
+# this is to remove virus manually
+old_IFS=$IFS
+
+echo "Scanning Mail Store for Viruses"
+
+/opt/zimbra/clamav/bin/clamscan --database /opt/zimbra/data/clamav/db/ --recursive=yes --infected /opt/zimbra/store/0/ | while IFS=/ read root opt zimbra store messagestore storeid msg folder messageid virusname found
+do
+  uid=`mysql -NBe "select comment from zimbra.mailbox where id='$storeid'"`
+  msgid=`echo $messageid | cut -d'-' -f1`
+  if [[ "$uid" == *.archive ]]; then
+        echo "Archive: Did not remove message $msgid from $uid"
+  elif [[ "$uid" == *virus*quarantine* ]]; then
+        echo "Skipping message $msgid in virus quarantine"
+  else
+        zmmailbox -z -m $uid dm $msgid
+        echo "Found and removed infected message $msgid from $uid"
+  fi
+done
+
+IFS=$old_IFS
