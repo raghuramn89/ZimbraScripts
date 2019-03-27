@@ -1,0 +1,17 @@
+# Calling from Local Script server
+ZBACKUP=/opt/zimbra/backup/mailbox
+# i have mounted share drive into linux.
+MPOINT=/mnt/win-share/
+FDATE=`date +"%Y%m%d"`
+# Mounting backup drive
+# mount.cifs //10.10.1.10/"zimbra-Mail servers-backup floder" /mnt/win-share -o domain=example,user=userone,password=Password@123
+mkdir -p /mnt/win-share/ExampleDomain/$FDATE
+DATE=`date +"%Y-%m-%d"`
+ZMBOX=/opt/zimbra/bin/zmmailbox
+echo " Running zmprov ... "
+       for mbox in `su - zimbra -c "zmprov -l gaa"`
+do
+echo " Generating files from backup $mbox ..."
+       su - zimbra -c "$ZMBOX -z -m $mbox getRestURL "//?fmt=tgz"" > /mnt/win-share/ExampleDomain/$FDATE/$mbox-$FDATE.tgz
+done
+# here backup will generate in tgz format.
